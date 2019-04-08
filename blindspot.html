@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Blindspot experiment</title>
+    <script src="jspsych.js"></script>
+    <script src="plugins/jspsych-html-keyboard-response.js"></script>
+    <script src="plugins/jspsych-blind-spot.js"></script>
+    <link href="css/jspsych.css" rel="stylesheet" type="text/css"></link>
+  </head>
+  <body></body>
+  <script>
+
+      var dots = {
+          horizontal: 3,
+          vertical: 3
+      };
+
+      // initialize 0-filled grid
+      var grid = new Array(dots.vertical);
+      for (var i=0; i<dots.vertical; i++){
+          grid[i] = new Array(dots.horizontal);
+          for (var j=0; j<dots.horizontal; j++){
+              grid[i][j] = true;
+          }
+      }
+
+      // shuffle dot positions
+      var gridPositions = {
+          column: [...Array(dots.horizontal).keys()],
+          row: [...Array(dots.vertical).keys()]
+      };
+      var randomized = jsPsych.randomization.factorial(gridPositions, 1);
+
+      var timeline = [];
+
+      var welcome = {
+          type: "html-keyboard-response",
+          stimulus: "welcome <b> text </b>"
+      };
+      timeline.push(welcome);
+
+      for (var i=0; i<dots.horizontal*dots.vertical; i++){
+          timeline.push(single_trial = {
+              type: "blind-spot",
+              horizontal_N: dots.horizontal,
+              vertical_N: dots.vertical,
+              column: randomized[i].column,
+              row: randomized[i].row
+          })
+      }
+
+      jsPsych.init({
+          timeline: timeline,
+          on_trial_start: function(){
+              jsPsych.pauseExperiment();
+          },
+          on_trial_finish: function(){  // timeout of <time_between_trials> ms between trials
+              setTimeout(jsPsych.resumeExperiment, 200);
+          }
+      });
+
+  </script>
+</html>
